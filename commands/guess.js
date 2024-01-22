@@ -45,7 +45,7 @@ module.exports = {
         //console.log(pressed);
         const collector = pressed.createMessageComponentCollector({
             ComponentType: ComponentType.Button,
-
+            time: 60000
         });
 
         collector.on('collect', async (i) => {
@@ -58,16 +58,21 @@ module.exports = {
                 await i.showModal(modal)
                 var reply = await i.awaitModalSubmit({
                     time: 60000
-                }).catch(error => console.log(error))
+                }).catch(error => {})
                 console.log(reply.fields.getTextInputValue("Name"));
                 var answer = reply.fields.getTextInputValue("Name")
                 if(answer.toLowerCase() == name.toLowerCase() || answer.toLowerCase() == alternative.toLowerCase()){
                     buttonRow.components[0].setDisabled(true)
                     interaction.editReply({content: flag, components: [buttonRow]})
-                    reply.reply({content: "<@" + reply.user + ">" + " got " + answer + " right"})
+                    reply.reply({content: "<@" + reply.user + ">" + " got " + name + " right"})
                 }
                 else reply.reply({content: "<@" + reply.user + ">" + " Answer is wrong"})
             }
+        })
+
+        collector.on("end", async (i) => {
+            buttonRow.components[0].setDisabled(true)
+            interaction.editReply({content: flag, components: [buttonRow]})
         })
     }
 }
