@@ -1,13 +1,35 @@
 const { token } = require("./config.json")
-const { Events, Client, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ComponentType, ButtonStyle } = require("discord.js")
+const { IntentsBitField, Client } = require("discord.js")
 const mongoose = require("mongoose")
-const Guess = require("./guess")
+//const Guess = require("./guess")
+const { CommandHandler } = require("djs-commander")
+const path = require("path")
 
-const client = new Client({intents: []})
+const client = new Client({intents: [
+    IntentsBitField.Flags.Guilds,
+    IntentsBitField.Flags.GuildMembers,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.MessageContent
+]})
 
+new CommandHandler({
+    client,
+    eventsPath: path.join(__dirname, "events"),
+    commandsPath: path.join(__dirname, "commands")
+});
 
+(async () => {
+    try{
+        mongoose.set("strictQuery", false)
+        await mongoose.connect("mongodb://root:1234@localhost:27017")
+        client.login(token)
+        console.log("Connected to mongodb");
+    } catch(error) {
+        console.log(error);
+    }
+})();
 
-async function connectToDB(){
+/* async function connectToDB(){
     try{
         mongoose.set("strictQuery", false)
         await mongoose.connect("mongodb://root:1234@localhost:27017")
@@ -52,7 +74,7 @@ client.on("interactionCreate", async (interaction) => {
             console.log(guess);
             if(name.toLowerCase() == guess.name.toLowerCase() || name.toLowerCase() == guess.alternative.toLowerCase()) interaction.reply({content: "Richtig"});
             else interaction.reply({content: "Falsch"})
-        } */
+        } 
         return
     }
     console.log(interaction.commandName);
@@ -96,4 +118,4 @@ client.on("interactionCreate", async (interaction) => {
     }
 })
 
-client.login(token)
+client.login(token) */
