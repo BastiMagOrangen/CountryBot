@@ -1,14 +1,9 @@
 const { token } = require("./config.json")
-const { IntentsBitField, Events, Client, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ComponentType, ButtonStyle } = require("discord.js")
+const { Events, Client, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ComponentType, ButtonStyle } = require("discord.js")
 const mongoose = require("mongoose")
 const Guess = require("./guess")
 
-const client = new Client({intents: [
-    //IntentsBitField.Flags.Guilds,
-    //IntentsBitField.Flags.GuildMembers,
-    //IntentsBitField.Flags.MessageContent,
-    //IntentsBitField.Flags.GuildMessages
-]})
+const client = new Client({intents: []})
 
 
 
@@ -32,7 +27,7 @@ client.on("interactionCreate", async (interaction) => {
     console.log(client.channels.cache.get(interaction.channelId));
     if(!interaction.isChatInputCommand())
     {
-        if(interaction.isButton() && interaction.customId === "guess-button") {
+        if(interaction.isButton() && interaction.customId === "guess-button") { 
             const modal = new ModalBuilder().setCustomId("guess-country").setTitle("Which country is that?")
             const nameInput = new TextInputBuilder().setCustomId("Name").setLabel("What country is searched?").setStyle(TextInputStyle.Short);
             const firstActionRow = new ActionRowBuilder().addComponents(nameInput)
@@ -97,7 +92,7 @@ client.on("interactionCreate", async (interaction) => {
         }
         const button = new ButtonBuilder().setLabel("Guess").setCustomId("guess-button").setStyle(ButtonStyle.Primary)
         const buttonRow = new ActionRowBuilder().addComponents(button)
-        interaction.reply({content: flag, components: [buttonRow]})
+        await interaction.reply({content: flag, components: [buttonRow]})
     }
 })
 
