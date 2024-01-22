@@ -38,8 +38,18 @@ client.on("interactionCreate", async (interaction) => {
             const firstActionRow = new ActionRowBuilder().addComponents(nameInput)
             modal.addComponents(firstActionRow)
             await interaction.showModal(modal)
+            var reply = await interaction.awaitModalSubmit({
+                time: 60000
+            }).catch(error => console.log(error))
+            console.log(reply.fields.getTextInputValue("Name"));
+            const guess = await Guess.findOne({guildId: interaction.guildId})
+            var answer = reply.fields.getTextInputValue("Name")
+            if(answer.toLowerCase() == guess.name.toLowerCase() || answer.toLowerCase() == guess.alternative.toLowerCase()){
+                reply.reply({content: "<@" + reply.user + ">" + " hat " + answer + " richtig erraten"})
+            }
+            else reply.reply({content: "<@" + reply.user + ">" + " Antwort ist falsch"})
         }
-        if(interaction.isModalSubmit() && interaction.customId === "guess-country")
+        /* if(interaction.isModalSubmit() && interaction.customId === "guess-country")
         {
             const name = interaction.fields.getTextInputValue("Name")
             console.log(name);
@@ -47,7 +57,7 @@ client.on("interactionCreate", async (interaction) => {
             console.log(guess);
             if(name.toLowerCase() == guess.name.toLowerCase() || name.toLowerCase() == guess.alternative.toLowerCase()) interaction.reply({content: "Richtig"});
             else interaction.reply({content: "Falsch"})
-        }
+        } */
         return
     }
     console.log(interaction.commandName);
