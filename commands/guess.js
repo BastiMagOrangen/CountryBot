@@ -6,7 +6,7 @@ const {
   ButtonBuilder,
   ComponentType,
   ButtonStyle,
-  EmbedBuilder
+  EmbedBuilder,
 } = require("discord.js");
 const Guess = require("../schemas/guess");
 
@@ -19,17 +19,23 @@ module.exports = {
     const response = await fetch("http://localhost:3100/country/random");
     const f = await response.json();
     let name = f.name;
-    let alternative = f.alternatives;
+    let alternatives = f.alternatives.toLowerCase().split(",");
     let flag = f.flagURL;
     let map = f.mapURL;
-    console.log(name, alternative, flag);
+    let birth = f.birthYear;
+    let death = f.deathYear;
+    let caught = false;
+
+    console.log(
+      `Current answer is ${name} (${birth}-${death}), with alternatives ${alternatives.toString()}`
+    );
     const query = {
       guildId: interaction.guildId,
     };
     try {
       const guess = await Guess.findOne(query);
       if (guess) {
-        (guess.name = name), (guess.alternative = alternative);
+        (guess.name = name), (guess.alternative = f.alternatives);
         guess.channelId = interaction.channelId;
         await guess.save().catch((e) => {
           console.log(e);
@@ -40,7 +46,7 @@ module.exports = {
           guildId: interaction.guildId,
           channelId: interaction.channelId,
           name: name,
-          alternative: alternative,
+          alternatives: f.alternatives,
         });
         await newGuess.save();
       }
@@ -52,7 +58,15 @@ module.exports = {
       .setCustomId("guess-button")
       .setStyle(ButtonStyle.Primary);
     const buttonRow = new ActionRowBuilder().addComponents(button);
-    const embed = new EmbedBuilder().setColor(0xe37f5d).setTitle("Guess the Country!").setImage(map).setThumbnail(flag);
+    const embed = new EmbedBuilder()
+      .setColor(0xe37f5d)
+      .setTitle("Guess the Country!")
+      .setImage(map)
+      .setFields([
+        { name: "Founding Year", value: birth + "", inline: true },
+        { name: "Death Year", value: death + "", inline: true },
+      ])
+      .setThumbnail(flag);
     const pressed = await interaction.reply({
       embeds: [embed],
       components: [buttonRow],
@@ -80,26 +94,29 @@ module.exports = {
             time: 60000,
           })
           .catch((error) => {});
-        console.log(reply.fields.getTextInputValue("Name"));
         var answer = reply.fields.getTextInputValue("Name");
-        //bug must be somewhere here
-        if (
-          answer.toLowerCase() == name.toLowerCase() ||
-          answer.toLowerCase() == alternative.toLowerCase()
-        ) {
-          buttonRow.components[0].setDisabled(true);
-          interaction.editReply({ content: flag, components: [buttonRow] });
-          reply.reply({
-            content: "<@" + reply.user + ">" + " got " + name + " right",
-          });
-        } else
-          reply.reply({
-            content: "<@" + reply.user + ">" + " Answer is wrong",
-            ephemeral: true,
-          });
+        //check if no one caught already, then check if answer is correct
+        if (!caught) {
+          if (
+            answer.toLowerCase() == name.toLowerCase() ||
+            alternatives.includes(answer.toLowerCase())
+          ) {
+            buttonRow.components[0].setDisabled(true);
+            interaction.editReply({ embeds: [embed], components: [buttonRow] });
+            reply.reply({
+              content: "<@" + reply.user + ">" + " got " + name + " right",
+            });
+            caught = true;
+          } else
+            reply.reply({
+              content: "<@" + reply.user + ">" + " Answer is wrong",
+              ephemeral: true,
+            });
+        }
       }
     });
 
+    // when timer runs out
     collector.on("end", async (i) => {
       buttonRow.components[0].setDisabled(true);
       interaction.editReply({ embeds: [embed], components: [buttonRow] });
