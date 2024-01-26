@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "start_api": "cd resthistory && start.bat"
+    "api": "cd resthistory && start.bat nogenerate"
   },
   "author": "",
   "license": "ISC",
