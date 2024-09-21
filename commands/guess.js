@@ -8,7 +8,8 @@ const {
   ButtonStyle,
   EmbedBuilder,
 } = require("discord.js");
-const Guess = require("../schemas/guess");
+const { createOrUpdateGuess } = require("../services/guessService");
+const { incrementCountryCatch } = require("../services/userService");
 
 module.exports = {
   data: {
@@ -18,6 +19,7 @@ module.exports = {
   run: async ({ interaction }) => {
     const response = await fetch("http://localhost:3100/country/random");
     const f = await response.json();
+    let id = f.id;
     let name = f.name;
     let alternatives = f.alternatives.toLowerCase().split(",");
     let flag = f.flagURL;
@@ -29,31 +31,13 @@ module.exports = {
     console.log(
       `Current answer is ${name} (${birth}-${death}), with alternatives ${alternatives.toString()}`
     );
-    const query = {
-      guildId: interaction.guildId,
-    };
+    
     try {
-      const guess = await Guess.findOne(query);
-      if (guess) {
-        guess.name = name;
-        guess.alternative = f.alternatives;
-        guess.channelId = interaction.channelId;
-        await guess.save().catch((e) => {
-          console.log(e);
-          return;
-        });
-      } else {
-        const newGuess = new Guess({
-          guildId: interaction.guildId,
-          channelId: interaction.channelId,
-          name: name,
-          alternatives: f.alternatives,
-        });
-        await newGuess.save();
-      }
+      await createOrUpdateGuess(interaction.guildId, interaction.channelId, name, f.alternatives);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to create or update guess:", error);
     }
+
     const button = new ButtonBuilder()
       .setLabel("Guess")
       .setCustomId("guess-button")
@@ -108,6 +92,7 @@ module.exports = {
               content: "<@" + reply.user + ">" + " got " + name + " right",
             });
             caught = true;
+            await incrementCountryCatch(reply.user.id, id, reply.user.username);
           } else
             reply.reply({
               content: "<@" + reply.user + ">" + " Answer is wrong",
