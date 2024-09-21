@@ -5,7 +5,16 @@ async function getUserCatches(userId) {
   return user ? user.catches : new Map();
 }
 
-async function incrementCountryCatch(userId, countryId, username) {
+async function getOrCreateUser(userId) {
+  let user = await User.findOne({ id: userId });
+  if (!user) {
+    user = new User({ id: userId });
+    user.save();
+  }
+  return user;
+}
+
+async function incrementCountryCatch(userId, countryId) {
   countryId = countryId.toString();
   try {
     let user = await User.findOne({ id: userId });
@@ -21,7 +30,6 @@ async function incrementCountryCatch(userId, countryId, username) {
       // Create a new user with the initial catch
       user = new User({
         id: userId,
-        name: username,
         catches: new Map([[countryId, 1]]),
       });
     }
@@ -33,4 +41,4 @@ async function incrementCountryCatch(userId, countryId, username) {
   }
 }
 
-module.exports = { incrementCountryCatch, getUserCatches };
+module.exports = { incrementCountryCatch, getUserCatches, getOrCreateUser };

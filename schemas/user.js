@@ -5,13 +5,14 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
-    name: {
-        type: String,
-        required: true
-    },
     catches: {
         type: Map,
         of: String,
+        default: {}
+    },
+    scores: {
+        type: Map,
+        of: Number,
         default: {}
     }
 })

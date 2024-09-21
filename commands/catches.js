@@ -3,7 +3,7 @@ const { getUserCatches } = require("../services/userService");
 
 module.exports = {
   data: {
-    name: "info",
+    name: "catches",
     description: "Display all catches for the current user",
   },
   run: async ({ interaction }) => {
