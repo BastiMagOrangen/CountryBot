@@ -7,5 +7,6 @@ module.exports = {
         const messages = interaction.channel.messages.fetch()
         await interaction.channel.bulkDelete(messages)
         interaction.channel.send("All Messages deleted!")
-    }
+    },
+    deleted: true
 }
