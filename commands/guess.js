@@ -35,7 +35,8 @@ module.exports = {
     try {
       const guess = await Guess.findOne(query);
       if (guess) {
-        (guess.name = name), (guess.alternative = f.alternatives);
+        guess.name = name;
+        guess.alternative = f.alternatives;
         guess.channelId = interaction.channelId;
         await guess.save().catch((e) => {
           console.log(e);
