@@ -83,8 +83,8 @@ module.exports = {
           .setCustomId("guess-country")
           .setTitle("Which country is that?");
         const nameInput = new TextInputBuilder()
-          .setCustomId("Name")
-          .setLabel("What country is searched?")
+          .setCustomId("name")
+          .setLabel("Countryname")
           .setStyle(TextInputStyle.Short);
         const firstActionRow = new ActionRowBuilder().addComponents(nameInput);
         modal.addComponents(firstActionRow);
@@ -94,7 +94,7 @@ module.exports = {
             time: 60000,
           })
           .catch((error) => {});
-        var answer = reply.fields.getTextInputValue("Name");
+        var answer = reply.fields.getTextInputValue("name");
         //check if no one caught already, then check if answer is correct
         if (!caught) {
           if (
