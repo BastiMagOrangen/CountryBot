@@ -27,7 +27,9 @@ module.exports = {
         .setFooter({ text: "Keep catching more countries!" })
         .setTimestamp(); // Include a timestamp
 
-      // Add a field for each country and the number of catches      
+      // Add a field for each country and the number of catches
+      console.log(userCatches);
+            
       for (const [countryId, count] of userCatches) {
         const response = await fetch(`http://localhost:3100/country/id/${countryId}`);
         if (!response.ok) throw new Error('Network response was not ok');

@@ -83,7 +83,7 @@ async function sendCountry(interaction, random, onCorrect) {
             await onCorrect(reply);
           } else
             reply.reply({
-              content: "``" + answer + "` is wrong! ❌",
+              content: "`" + answer + "` is wrong! ❌",
               ephemeral: true,
             });
         }

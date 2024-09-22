@@ -1,5 +1,5 @@
-const CountriesExecutor = require("../games/countries");
-const DBDExecutor = require("../games/deadbydaylight");
+const CommonsExecutor = require("../games/commons");
+
 const { newGame, clearGames } = require("../services/gameService");
 
 const {
@@ -99,6 +99,21 @@ module.exports = {
         });
         // Handle the start button
       } else if (comp.customId === "start_game") {
+        if(comp.user.id !== interaction.user.id) {
+          await comp.reply({
+            content: "You need to be the **host** to start the game ❌",
+            ephemeral: true,
+          });
+          return;
+        }
+        if (players.length < 1) {
+          await comp.reply({
+            content: "You need at least **1 player** to start the game ❌",
+            ephemeral: true,
+          });
+          return;
+        }
+        clearGames();
         const game = await newGame(
           comp.guild.id,
           comp.channel.id,
@@ -112,31 +127,11 @@ module.exports = {
         });
 
         //disable buttons
-        console.log(game.uuid);
         row.components.forEach((c) => c.setDisabled(true));
         await interaction.editReply({ embeds: [embed], components: [row] });
 
-        //set executor and start game
-        let executor;
-        if (type === "countries") {
-          executor = new CountriesExecutor();
-        } else if (type === "deadbydaylight") {
-          executor = new DBDExecutor();
-        }
-        interaction.channel.send("3️⃣").then((message) => {
-          setTimeout(() => {
-            message.edit("2️⃣").then((message) => {
-              setTimeout(() => {
-                message.edit("1️⃣").then((message) => {
-                  setTimeout(() => {
-                    message.delete();
-                    executor.newQuestion(interaction, game.uuid);
-                  }, 800);
-                });
-              }, 800);
-            });
-          }, 800);
-        });
+        // start
+        new CommonsExecutor().startGameProcedures(interaction, game.uuid, type);
       }
     });
   },

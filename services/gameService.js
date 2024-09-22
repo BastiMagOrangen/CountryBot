@@ -1,6 +1,8 @@
 const Game = require("../schemas/game");
+const GameUser = require("../schemas/gameUser");
 const { getOrCreateUser } = require("./userService");
 const { getOrCreateServer } = require("./serverService");
+const mongoose = require("mongoose");
 
 // Import necessary schemas
 
@@ -17,7 +19,7 @@ const { getOrCreateServer } = require("./serverService");
  */
 async function newGame(server, channel, host, players, type, goal) {
   const castedPlayers = await Promise.all(
-    players.map(async (player) => await getOrCreateUser(player))
+    players.map(async (player) => await getOrCreateGameUser(player))
   );
 
   try {
@@ -38,16 +40,48 @@ async function newGame(server, channel, host, players, type, goal) {
   }
 }
 
+async function getOrCreateGameUser(userId) {
+  let user = await GameUser.findOne({ id: userId });
+  if (!user) {
+    user = new GameUser({ user: await getOrCreateUser(userId) });
+    user.save();
+  }
+  return user;
+}
+
+async function addPoints(gameId, userId, points) {
+  const game = await Game.findOne({ uuid: gameId });
+  console.log(game.toObject());
+  const player = game.players.find((player) => {
+    console.log(player);
+    return player.user.id === userId;
+  });
+  await player.save();
+  const newPoints = (player.points += points);
+  const user = player.user;
+  if (user.scores.has(countryId)) {
+    // Increment the existing count
+    user.scores.set(countryId, parseInt(user.catches.get(countryId), 10) + 1);
+  } else {
+    // Add a new entry for the countryId
+    user.scores.set(countryId, 1);
+  }
+  await user.save();
+  return newPoints;
+}
+
 async function clearGames() {
-    await Game.deleteMany({});
-    console.log("Games cleared!");
-    
+  await Game.deleteMany({});
+  console.log("Games cleared!");
 }
 
 async function getGame(gameId) {
-  return await Game.findOne({ id: gameId });
+  return await Game.findOne({ uuid: gameId });
 }
 
 module.exports = {
-  newGame, clearGames, 
+  newGame,
+  clearGames,
+  getGame,
+  addPoints,
 };

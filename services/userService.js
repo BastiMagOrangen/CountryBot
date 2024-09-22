@@ -21,7 +21,7 @@ async function incrementCountryCatch(userId, countryId) {
     if (user) {
       if (user.catches.has(countryId)) {
         // Increment the existing count
-        user.catches.set(countryId, user.catches.get(countryId) + 1);
+        user.catches.set(countryId, parseInt(user.catches.get(countryId), 10) + 1);
       } else {
         // Add a new entry for the countryId
         user.catches.set(countryId, 1);
