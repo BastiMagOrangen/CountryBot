@@ -1,4 +1,5 @@
 const Game = require("../schemas/game");
+const User = require("../schemas/user");
 const GameUser = require("../schemas/gameUser");
 const { getOrCreateUser } = require("./userService");
 const { getOrCreateServer } = require("./serverService");
@@ -50,23 +51,27 @@ async function getOrCreateGameUser(userId) {
 }
 
 async function addPoints(gameId, userId, points) {
-  const game = await Game.findOne({ uuid: gameId });
-  console.log(game.toObject());
+  const user = await User.findOne({ id: userId });
+  const game = await Game.findOne({ uuid: gameId }).populate("players");
+  //console.log(game.toObject());
   const player = game.players.find((player) => {
-    console.log(player);
-    return player.user.id === userId;
+    console.log(user);
+    return player.user.equals(user._id);
   });
-  await player.save();
-  const newPoints = (player.points += points);
-  const user = player.user;
-  if (user.scores.has(countryId)) {
-    // Increment the existing count
-    user.scores.set(countryId, parseInt(user.catches.get(countryId), 10) + 1);
+
+  const newPoints = player.points + points;
+  player.points = newPoints;
+  console.log(player.points);
+  console.log(newPoints);
+  
+  
+  if (user.scores.has(game.type)) {
+    user.scores.set(game.type, parseInt(user.scores.get(game.type), 10) + 1);
   } else {
-    // Add a new entry for the countryId
-    user.scores.set(countryId, 1);
+    user.scores.set(game.type, 1);
   }
-  await user.save();
+
+  await Promise.all([user.save(), player.save()]);
   return newPoints;
 }
 

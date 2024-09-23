@@ -5,6 +5,11 @@ async function getUserCatches(userId) {
   return user ? user.catches : new Map();
 }
 
+async function getUserScores(userId) {
+  let user = await User.findOne({ id: userId });
+  return user ? user.scores : new Map();
+}
+
 async function getOrCreateUser(userId) {
   let user = await User.findOne({ id: userId });
   if (!user) {
@@ -41,4 +46,4 @@ async function incrementCountryCatch(userId, countryId) {
   }
 }
 
-module.exports = { incrementCountryCatch, getUserCatches, getOrCreateUser };
+module.exports = { incrementCountryCatch, getUserCatches, getOrCreateUser, getUserScores };

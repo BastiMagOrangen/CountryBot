@@ -38,7 +38,7 @@ class CommonsExecutor {
                   if (points < game.goal) {
                     this.sendMessage(interaction, executor, gameId);
                   }
-                  i.reply({
+                  interaction.channel.send({
                     content:
                       "**" +
                       interaction.user.username +
