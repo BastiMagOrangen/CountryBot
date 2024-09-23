@@ -50,6 +50,7 @@ async function sendCountry(interaction, random, onCorrect) {
   });
 
   collector.on("collect", async (i) => {
+    if (random.caught) return;
     if (i.customId == "guess-button") {
       const modal = new ModalBuilder()
         .setCustomId("guess-country")
@@ -70,18 +71,11 @@ async function sendCountry(interaction, random, onCorrect) {
             answer.toLowerCase() == random.name.toLowerCase() ||
             random.alternatives.includes(answer.toLowerCase())
           ) {
-            buttonRow.components[0].setDisabled(true);
-            pressed.edit({ embeds: [embed], components: [buttonRow] });
-            await reply.reply({
-              content:
-                "**" +
-                reply.user.displayName +
-                "** got `" +
-                random.name +
-                "` right",
-            });
-            random.caught = true;
-            await onCorrect(reply);
+            if (await onCorrect(reply)) {
+              buttonRow.components[0].setDisabled(true);
+              await pressed.edit({ embeds: [embed], components: [buttonRow] });
+              random.caught = true;
+            }
           } else
             await reply.reply({
               content: "`" + answer + "` is wrong! ❌",
@@ -100,7 +94,7 @@ async function sendCountry(interaction, random, onCorrect) {
   // when timer runs out
   collector.on("end", async (i) => {
     buttonRow.components[0].setDisabled(true);
-    interaction.editReply({ embeds: [embed], components: [buttonRow] });
+    await interaction.editReply({ embeds: [embed], components: [buttonRow] });
   });
 }
 

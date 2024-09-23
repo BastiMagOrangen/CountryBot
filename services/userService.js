@@ -10,6 +10,10 @@ async function getUserScores(userId) {
   return user ? user.scores : new Map();
 }
 
+async function clearUsers() {
+  await User.deleteMany({});
+}
+
 async function getOrCreateUser(userId) {
   let user = await User.findOne({ id: userId });
   if (!user) {
@@ -26,7 +30,10 @@ async function incrementCountryCatch(userId, countryId) {
     if (user) {
       if (user.catches.has(countryId)) {
         // Increment the existing count
-        user.catches.set(countryId, parseInt(user.catches.get(countryId), 10) + 1);
+        user.catches.set(
+          countryId,
+          parseInt(user.catches.get(countryId), 10) + 1
+        );
       } else {
         // Add a new entry for the countryId
         user.catches.set(countryId, 1);
@@ -46,4 +53,10 @@ async function incrementCountryCatch(userId, countryId) {
   }
 }
 
-module.exports = { incrementCountryCatch, getUserCatches, getOrCreateUser, getUserScores };
+module.exports = {
+  incrementCountryCatch,
+  getUserCatches,
+  getOrCreateUser,
+  getUserScores,
+  clearUsers,
+};

@@ -1,7 +1,5 @@
 const CommonsExecutor = require("../games/commons");
-
 const { newGame, clearGames } = require("../services/gameService");
-
 const {
   ButtonBuilder,
   EmbedBuilder,
@@ -11,6 +9,7 @@ const {
   ComponentType,
   ChatInputCommandInteraction,
 } = require("discord.js");
+const { clearUsers } = require("../services/userService");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -113,11 +112,14 @@ module.exports = {
           });
           return;
         }
+        //Testing
+        //clearUsers();
         clearGames();
+
         const game = await newGame(
           comp.guild.id,
           comp.channel.id,
-          comp.user.id,
+          interaction.user.id,
           players,
           type,
           goal

@@ -1,4 +1,4 @@
-const { addPoints, getGame } = require("../services/gameService");
+const { addPoints, getGame, getPlayer, deleteGame } = require("../services/gameService");
 
 const CountriesExecutor = require("./countries");
 const DBDExecutor = require("./deadbydaylight");
@@ -27,27 +27,48 @@ class CommonsExecutor {
                 const random = await executor.generateNew();
                 console.log(random);
                 executor.sendQuestion(interaction, random, async (i) => {
-                  executor.onCorrect(interaction, random);
-                  
-                  const points = await addPoints(
-                    gameId,
-                    interaction.user.id,
-                    1
-                  );
-                  const game = await getGame(gameId);
-                  if (points < game.goal) {
-                    this.sendMessage(interaction, executor, gameId);
+                  if ((await getPlayer(i.user.id, gameId)) === null) {
+                    await i.reply({
+                      content: "You are not participating in this game! ⛔",
+                      ephemeral: true,
+                    });
+                    return false;
                   }
+                  executor.onCorrect(interaction, random);
+
+                  const points = await addPoints(gameId, i.user.id, 1);
+                  const game = await getGame(gameId);
+                  await i.reply({
+                    content:
+                      "**" +
+                      i.user.displayName +
+                      "** got `" +
+                      random.name +
+                      "` right",
+                  });
                   interaction.channel.send({
                     content:
                       "**" +
-                      interaction.user.username +
+                      i.user.username +
                       "** now has `" +
                       points +
                       "/" +
                       game.goal +
                       "` points!",
                   });
+
+                  if (points < game.goal) {
+                    this.sendMessage(interaction, executor, gameId);
+                  } else {
+                    interaction.channel.send({
+                      content:
+                        "**" +
+                        i.user.username +
+                        "** won the game! 🎉",
+                    });
+                    await deleteGame(gameId);
+                  }
+                  return true;
                 });
               }, 800);
             });

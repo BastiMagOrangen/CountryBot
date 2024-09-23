@@ -11,8 +11,7 @@ const GameSchema = new Schema({
     uniqe: true,
   },
   server: {
-    type: Schema.Types.ObjectId,
-    ref: Server,
+    type: Number,
     required: true,
   },
   channel: {
@@ -20,14 +19,12 @@ const GameSchema = new Schema({
     required: true,
   },
   host: {
-    type: Schema.Types.ObjectId,
-    ref: User,
+    type: Number,
     required: true,
   },
   players: {
     type: Array,
-    of: Schema.Types.ObjectId,
-    ref: GameUser,
+    of: Number,
     required: true,
   },
   type: {
