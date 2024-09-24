@@ -13,7 +13,11 @@ const GameUserSchema = new mongoose.Schema({
     default: 0,
   },
   game: {
-    type: String
+    type: String,
+  },
+  skipping: {
+    type: Boolean,
+    default: false,
   },
 });
 

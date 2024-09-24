@@ -64,7 +64,7 @@ async function getOrCreateGameUser(userId) {
 }
 
 async function getPlayer(userId, gameId) {
-  const gameUser = await GameUser.findOne({ "user": userId, "game": gameId });
+  const gameUser = await GameUser.findOne({ user: userId, game: gameId });
   return gameUser;
 }
 
@@ -86,6 +86,18 @@ async function addPoints(gameId, userId, points) {
 
   await Promise.all([user.save(), player.save()]);
   return newPoints;
+}
+
+async function setAndGetSkips(gameId, userId) {
+  const player = await getPlayer(userId, gameId);
+  player.skipping = true;
+  await player.save();
+
+  const game = await getGame(gameId);
+  const skips = game.skips + 1;
+  game.skips = skips;
+  await game.save();
+  return skips;
 }
 
 async function clearGames() {
@@ -110,4 +122,5 @@ module.exports = {
   addPoints,
   deleteGame,
   getPlayer,
+  setAndGetSkips
 };

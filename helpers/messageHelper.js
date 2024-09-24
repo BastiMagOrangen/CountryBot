@@ -7,6 +7,7 @@ const {
   ComponentType,
   ButtonStyle,
   EmbedBuilder,
+  ButtonInteraction,
 } = require("discord.js");
 const { incrementCountryCatch } = require("../services/userService");
 
@@ -24,13 +25,20 @@ function getPrettyFormat(f) {
 
 /**
  * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {Object} random
+ * @param {(interaction: ButtonInteraction) => Boolean} onCorrect
+ * @param {(interaction: ButtonInteraction) => Boolean} onSkip
  */
-async function sendCountry(interaction, random, onCorrect) {
+async function sendCountry(interaction, random, onCorrect, onSkip) {
   const button = new ButtonBuilder()
     .setLabel("Guess")
     .setCustomId("guess-button")
     .setStyle(ButtonStyle.Primary);
-  const buttonRow = new ActionRowBuilder().addComponents(button);
+  const skip = new ButtonBuilder()
+    .setLabel("Skip")
+    .setCustomId("skip-button")
+    .setStyle(ButtonStyle.Secondary);
+  const buttonRow = new ActionRowBuilder().addComponents(button, skip);
   const embed = new EmbedBuilder()
     .setColor(0xe37f5d)
     .setTitle("Guess the Country!")
@@ -40,12 +48,12 @@ async function sendCountry(interaction, random, onCorrect) {
       { name: "Death Year", value: random.death + "", inline: true },
     ])
     .setThumbnail(random.flag);
-  const pressed = await interaction.channel.send({
+  const newInteraction = await interaction.channel.send({
     embeds: [embed],
     components: [buttonRow],
   });
-  //console.log(pressed);
-  const collector = pressed.createMessageComponentCollector({
+  //console.log(newInteraction);
+  const collector = newInteraction.createMessageComponentCollector({
     ComponentType: ComponentType.Button,
   });
 
@@ -73,7 +81,10 @@ async function sendCountry(interaction, random, onCorrect) {
           ) {
             if (await onCorrect(reply)) {
               buttonRow.components[0].setDisabled(true);
-              await pressed.edit({ embeds: [embed], components: [buttonRow] });
+              await newInteraction.edit({
+                embeds: [embed],
+                components: [buttonRow],
+              });
               random.caught = true;
             }
           } else
@@ -84,6 +95,11 @@ async function sendCountry(interaction, random, onCorrect) {
         }
       } catch (e) {
         console.log(e);
+      }
+    } else if (i.customId == "skip-button") {
+      if (await onSkip(i)) {
+        buttonRow.components[0].setDisabled(true);
+        await newInteraction.edit({ embeds: [embed], components: [buttonRow] });
       }
     }
   });

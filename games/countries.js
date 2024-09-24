@@ -10,8 +10,8 @@ class CountriesExecutor {
   async onCorrect(interaction, random) {
     await incrementCountryCatch(interaction.user.id, random.id);
   }
-  async sendQuestion(interaction, random, onCorrect) {
-    sendCountry(interaction, random, onCorrect);
+  async sendQuestion(interaction, random, onCorrect, onSkip) {
+    sendCountry(interaction, random, onCorrect, onSkip);
   }
   answerEquals(string, answer) {}
 }
